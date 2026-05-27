@@ -21,7 +21,10 @@ val githubRefType = System.getenv("GITHUB_REF_TYPE").orEmpty()
 val githubRefName = System.getenv("GITHUB_REF_NAME").orEmpty()
 val isTagRelease = githubRefType == "tag"
 val expectedTagName = "v$pluginVersion"
-val isPublishRequested = gradle.startParameter.taskNames.any { taskName -> taskName.startsWith("publish") }
+val isPublishRequested =
+    gradle.startParameter.taskNames.any { taskName ->
+        taskName.startsWith("publish") && !taskName.contains("ToMavenLocal")
+    }
 val hasSigningKey = providers.gradleProperty("signingInMemoryKey").isPresent
 
 if (isTagRelease && githubRefName != expectedTagName) {

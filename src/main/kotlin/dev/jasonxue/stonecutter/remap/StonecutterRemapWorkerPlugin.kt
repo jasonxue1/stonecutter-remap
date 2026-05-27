@@ -113,12 +113,12 @@ class StonecutterRemapWorkerPlugin : Plugin<Project> {
         baseVersion: String,
         targetVersion: String,
         links: List<LinkSpec>,
-    ): List<String> {
+    ): List<MappingStep> {
         if (baseVersion == targetVersion) return emptyList()
 
         data class Step(
             val version: String,
-            val steps: List<String>,
+            val steps: List<MappingStep>,
         )
 
         val queue = ArrayDeque<Step>()
@@ -132,10 +132,10 @@ class StonecutterRemapWorkerPlugin : Plugin<Project> {
 
             for (link in links) {
                 if (link.from == version && visited.add(link.to)) {
-                    queue += Step(link.to, steps + "forward:${link.file}")
+                    queue += Step(link.to, link.appendMappingStep(steps, reverse = false))
                 }
                 if (link.to == version && visited.add(link.from)) {
-                    queue += Step(link.from, steps + "reverse:${link.file}")
+                    queue += Step(link.from, link.appendMappingStep(steps, reverse = true))
                 }
             }
         }

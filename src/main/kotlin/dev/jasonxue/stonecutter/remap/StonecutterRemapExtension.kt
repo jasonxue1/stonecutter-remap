@@ -19,6 +19,11 @@ package dev.jasonxue.stonecutter.remap
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import java.io.File
 import javax.inject.Inject
 
 abstract class StonecutterRemapExtension
@@ -35,14 +40,34 @@ abstract class StonecutterRemapExtension
         fun link(
             from: String,
             to: String,
-            file: String,
+            file: File,
         ) {
             links += LinkSpec(from, to, file)
+        }
+
+        fun link(
+            from: String,
+            to: String,
+        ) {
+            links += LinkSpec(from, to, null)
         }
     }
 
 data class LinkSpec(
     val from: String,
     val to: String,
-    val file: String,
+    val file: File?,
+) {
+    fun appendMappingStep(
+        steps: List<MappingStep>,
+        reverse: Boolean,
+    ): List<MappingStep> = file?.let { steps + MappingStep(it, reverse) } ?: steps
+}
+
+data class MappingStep(
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val file: File,
+    @get:Input
+    val reverse: Boolean,
 )

@@ -29,6 +29,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -64,8 +65,8 @@ abstract class RemapSourcesTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputDir: DirectoryProperty
 
-    @get:Input
-    abstract val mappingSteps: ListProperty<String>
+    @get:Nested
+    abstract val mappingSteps: ListProperty<MappingStep>
 
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
@@ -114,7 +115,7 @@ abstract class RemapSourcesTask : DefaultTask() {
         }
     }
 
-    private fun buildMappingSet(steps: List<String>): MappingSet {
+    private fun buildMappingSet(steps: List<MappingStep>): MappingSet {
         val iterator = steps.iterator()
         val first =
             readMappings(iterator.next())
@@ -139,13 +140,7 @@ abstract class RemapSourcesTask : DefaultTask() {
         return LegacyMappingsReader(first).read()
     }
 
-    private fun readMappings(step: String): Map<String, LegacyMapping> {
-        val separator = step.indexOf(':')
-        require(separator > 0) { "Invalid mapping step: $step" }
-        val direction = step.substring(0, separator)
-        val path = project.rootProject.file(step.substring(separator + 1)).toPath()
-        return LegacyMapping.readMappings(path, direction == "reverse")
-    }
+    private fun readMappings(step: MappingStep): Map<String, LegacyMapping> = LegacyMapping.readMappings(step.file.toPath(), step.reverse)
 
     private fun LegacyMapping.copyShallow(): LegacyMapping {
         val copy = LegacyMapping(oldName, newName)
