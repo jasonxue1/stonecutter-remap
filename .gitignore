@@ -1,0 +1,17 @@
+.gradle/
+.kotlin/
+.idea/
+build/
+out/
+
+*/.gradle/
+*/.kotlin/
+*/.idea/
+*/build/
+*/out/
+
+*.iml
+.DS_Store
+
+**/gradle-app.setting
+**/.DS_Store
